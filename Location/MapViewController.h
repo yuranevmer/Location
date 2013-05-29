@@ -12,5 +12,9 @@
 
 @interface MapViewController : UIViewController <CLLocationManagerDelegate, MKMapViewDelegate>
 
+
+-(void) startFindingLocation;
+-(void) foundLocation:(CLLocation*)location;
+
 @property (nonatomic, retain) CLLocationManager* locationManager;
 @end

@@ -11,7 +11,6 @@
 
 
 @interface MapViewController ()
--(void) findLocation;
 
 
 @property (retain, nonatomic) IBOutlet UIButton *searchButton;
@@ -41,30 +40,44 @@
 }
 
 - (IBAction)clickedSearchButton:(id)sender {
-    CLLocationCoordinate2D coords = self.currentLocation.coordinate;
-    MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coords, 100, 100);
-    [self.mapView setRegion:region animated:YES];
+    [self startFindingLocation];
 }
 
 -(void) startFindingLocation
 {
+    [self.locationManager startUpdatingLocation];
+    self.activityIndicator.alpha = 1.0;
     [self.activityIndicator startAnimating];
     [self.locationManager startUpdatingLocation];
 }
+-(void) foundLocation:(CLLocation*) location
+{
+    [self.locationManager stopUpdatingLocation];
+    [self.activityIndicator stopAnimating];
+    CLLocationCoordinate2D coords = location.coordinate;
+    MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coords, 100, 100);
+    [self.mapView setRegion:region animated:YES];
+}
 
+#pragma mark -
+#pragma mark <CLLocationManagerDelegate>
 
 -(void) locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
 {
     self.currentLocation = newLocation;
-    NSLog(@"%@", newLocation);
+    [self foundLocation:newLocation];
 }
+
+#pragma mark -
+#pragma mark <MKMapViewDelegate>
 
 -(void) mapView:(MKMapView *)mapView didUpdateUserLocation:(MKUserLocation *)userLocation
 {
+    /*
     CLLocationCoordinate2D coords = userLocation.coordinate;
     MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(coords, 2000, 2000);
     [self.mapView setRegion:region animated:YES];
-    
+     */
 }
 
 - (void)viewDidLoad
@@ -72,7 +85,6 @@
     [super viewDidLoad];
     self.mapView.showsUserLocation = YES;
     self.mapView.delegate = self;
-    [self startFindingLocation];
 }
 
 - (void)didReceiveMemoryWarning
